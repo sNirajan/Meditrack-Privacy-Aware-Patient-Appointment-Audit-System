@@ -3,7 +3,7 @@ namespace MediTrack.Api.Models;
 public class AuditLog
 {
     // Unique ID for this audit log entry
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     // The ID of the user who performed the action
     // FOr now, this can come from a fake request header

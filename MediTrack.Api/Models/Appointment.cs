@@ -3,8 +3,8 @@ namespace MediTrack.Api.Models;
 public class Appointment
 {
     // unique id for this appointment
-    public Guid Id {get; set;}
-
+    public Guid Id {get; set;} = Guid.NewGuid();
+    
     // this connects the appointment to patient, later EF Core will treat this as a foreign key
     public Guid PatientId {get; set;}
 
@@ -30,5 +30,5 @@ public class Appointment
 
     // Navigation property again
     // Example later: appointment.Provider.FullName
-    public Patient? Provider {get; set;}
+    public Provider? Provider {get; set;}
 }
