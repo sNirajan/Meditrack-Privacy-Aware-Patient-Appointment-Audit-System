@@ -1,8 +1,8 @@
 using MediTrack.Api.Data; // lets program.cs recognize ApplicationDbContext
-using Microsoft.EntityFrameworkCore; // lets program.cs use EF core methods 
+using MediTrack.Api.Services; // lets program.cs recognize PatientService
+using Microsoft.EntityFrameworkCore; // lets program.cs use EF core methods
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // This tells Asp.Net core that we are using controller classes
 // Later, this allows routes like /api/patients or /api/appointments to work
@@ -15,9 +15,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     // This reads "DefaultConnection" from appsettings.Development.json
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    // This tells EF core to use SQLite as the database for local development
-    options.UseSqlServer(connectionString);
+    // This tells if the SQL connection fails temporarily, retry instead of immediately failing.
+    options.UseSqlServer(
+        connectionString,
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure();
+        }
+    );
 });
+
+// this tells .NET, if a controller asks for PatientService, create one for that request
+builder.Services.AddScoped<PatientService>();
+builder.Services.AddScoped<ProviderService>();
+builder.Services.AddScoped<AppointmentService>();
 
 // This builds the actual web application
 // Before this line, we are only registering/configuring services
@@ -34,7 +45,3 @@ app.MapControllers();
 
 // This starts the web server
 app.Run();
-
-
-
-
