@@ -1,9 +1,11 @@
 using MediTrack.Api.Dtos;
 using MediTrack.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediTrack.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProvidersController : ControllerBase

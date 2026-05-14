@@ -1,9 +1,11 @@
 using MediTrack.Api.Dtos;
 using MediTrack.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediTrack.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class AppointmentsController : ControllerBase
@@ -59,6 +61,21 @@ public class AppointmentsController : ControllerBase
     public async Task<ActionResult<AppointmentResponse>> GetAppointmentById(Guid id)
     {
         var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
+        if (appointment is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(appointment);
+    }
+
+    // PATCH /api/appointments/{id}/cancel
+    // Cancels an appointment without deleting it from the system
+    [HttpPatch("{id:guid}/cancel")]
+    public async Task<ActionResult<AppointmentResponse>> CancelAppointment(Guid id)
+    {
+        var appointment = await _appointmentService.CancelAppointmentAsync(id);
+
         if (appointment is null)
         {
             return NotFound();
