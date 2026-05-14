@@ -33,6 +33,7 @@ public class AuditLogService
             UserRole = userRole,
             Action = action,
             EntityType = entityType,
+            EntityId = entityId,
             Details = details,
             TimestampUtc = DateTime.UtcNow,
         };
