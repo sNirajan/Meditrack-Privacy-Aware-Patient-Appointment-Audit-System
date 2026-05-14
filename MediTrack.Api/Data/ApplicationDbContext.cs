@@ -1,9 +1,10 @@
 using MediTrack.Api.Models; // model classes
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediTrack.Api.Data; // data classes
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     // standard EF core setup, base(options) means pass those options to the parent DbContext class.
 
@@ -32,7 +33,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder); // this lets identity add its table mappings first
 
         // configuring the Patients table
         modelBuilder.Entity<Patient>(entity =>
