@@ -2,9 +2,9 @@ namespace MediTrack.Api.Models;
 
 public class Provider
 {
-   // unique ID for this provider
-   // We use Guid instead of int because it is harder to guess from the outside 
-   public Guid Id { get; set; } = Guid.NewGuid();
+    // unique ID for this provider
+    // We use Guid instead of int because it is harder to guess from the outside
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     // provider's fullname like "Dr. Tim Horton"
     public string FullName { get; set; } = string.Empty;

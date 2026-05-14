@@ -1,4 +1,3 @@
-
 namespace MediTrack.Api.Models;
 
 public class Patient
