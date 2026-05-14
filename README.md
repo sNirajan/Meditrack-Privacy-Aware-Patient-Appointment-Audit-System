@@ -16,19 +16,25 @@ This project is in active development.
 
 So far, the backend foundation is working:
 
-- ASP.NET Core Web API project setup
-- Entity Framework Core configured with SQL Server provider
-- Azure SQL Database connected
-- Initial EF Core migration applied to Azure SQL
-- Patient, Provider, Appointment, and AuditLog models created
-- Patient API endpoints added
-- Provider API endpoints added
+- ASP.NET Core Web API backend
+- Azure SQL Database integration
+- Entity Framework Core with SQL Server provider
+- EF Core migrations
+- Patient, Provider, Appointment, and AuditLog models
+- Patient, Provider, and Appointment API endpoints
+- Appointment cancellation workflow
+- ASP.NET Core Identity for user accounts
+- JWT authentication
+- Admin-only audit log access
+- Audit logging for sensitive actions
+- Authenticated user tracking in audit logs
 - DTO-based request/response structure
 - Basic validation using data annotations
-- Service layer added for backend logic
-- SQL Server retry behavior added for cloud database connection resiliency
+- Service-layer architecture
+- xUnit service tests
+- GitHub Actions CI for build/test automation
+- Deployed on Azure App Service
 
-I am currently working on the Appointment API and audit logging flow.
 
 ---
 
