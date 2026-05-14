@@ -8,13 +8,24 @@ namespace MediTrack.Api.Services;
 public class ProviderService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly AuditLogService _auditLogService;
+
+    // Gives this service access to the currently authenticated user's ID and role from the JWT.
+    private readonly CurrentUserService _currentUserService;
 
     // ASP.Net Core gives us ApplicationDbContext through dependency injection
-    // This service uses it to read and write provider records
+    // database context handles appoinment data
+    // audit service records important appointment actions
 
-    public ProviderService(ApplicationDbContext dbContext)
+    public ProviderService(
+        ApplicationDbContext dbContext,
+        AuditLogService auditLogService,
+        CurrentUserService currentUserService
+    )
     {
         _dbContext = dbContext;
+        _auditLogService = auditLogService;
+        _currentUserService = currentUserService;
     }
 
     // Creates a new provider record from the request data
@@ -31,6 +42,15 @@ public class ProviderService
 
         // This sends the insert operation to Azure SQL
         await _dbContext.SaveChangesAsync();
+
+        await _auditLogService.RecordAsync(
+            userId: _currentUserService.UserId,
+            userRole: _currentUserService.UserRole,
+            action: "CreatedProvider",
+            entityType: "Provider",
+            entityId: provider.Id,
+            details: $"Created provider record for {provider.FullName}."
+        );
 
         return MapToResponse(provider);
     }

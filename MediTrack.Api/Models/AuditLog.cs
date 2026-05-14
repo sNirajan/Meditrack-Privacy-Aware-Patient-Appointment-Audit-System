@@ -33,5 +33,4 @@ public class AuditLog
     // Extra readable information about the event
     // Example: "Provider viewed patient profile"
     public string Details { get; set; } = string.Empty;
-
 }

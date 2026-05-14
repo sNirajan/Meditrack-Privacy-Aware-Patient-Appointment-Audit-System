@@ -8,12 +8,25 @@ namespace MediTrack.Api.Services;
 public class AppointmentService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly AuditLogService _auditLogService;
+
+    // Gives this service access to the currently authenticated user's ID and role from the JWT.
+    private readonly CurrentUserService _currentUserService;
 
     // ASP.NET Core gives us the database context through dependency injection.
     // This service uses it to check patients, providers, and appointments.
-    public AppointmentService(ApplicationDbContext dbContext)
+
+    // database context handles appointment data
+    // audit service records important appointment actions
+    public AppointmentService(
+        ApplicationDbContext dbContext,
+        AuditLogService auditLogService,
+        CurrentUserService currentUserService
+    )
     {
         _dbContext = dbContext;
+        _auditLogService = auditLogService;
+        _currentUserService = currentUserService;
     }
 
     // Creates a new appointment after checking the patient, provider and date
@@ -70,6 +83,15 @@ public class AppointmentService
         // This sends the insert operation to Azure SQL
         await _dbContext.SaveChangesAsync();
 
+        await _auditLogService.RecordAsync(
+            userId: _currentUserService.UserId,
+            userRole: _currentUserService.UserRole,
+            action: "CreatedAppointment",
+            entityType: "Appointment",
+            entityId: appointment.Id,
+            details: $"Created appointment for {patient.FullName} with {provider.FullName}."
+        );
+
         return MapToResponse(appointment);
     }
 
@@ -97,6 +119,34 @@ public class AppointmentService
         {
             return null;
         }
+        return MapToResponse(appointment);
+    }
+
+    // Cancels an existing appointment by changing its status
+    // We do not delete the appointment because healthcare style systems should keep history
+    public async Task<AppointmentResponse?> CancelAppointmentAsync(Guid id)
+    {
+        var appointment = await _dbContext
+            .Appointments.Include(appointment => appointment.Patient)
+            .Include(appointment => appointment.Provider)
+            .FirstOrDefaultAsync(appointment => appointment.Id == id);
+
+        if (appointment is null)
+        {
+            return null;
+        }
+
+        appointment.Status = "Cancelled";
+        await _dbContext.SaveChangesAsync();
+
+        await _auditLogService.RecordAsync(
+            userId: _currentUserService.UserId,
+            userRole: _currentUserService.UserRole,
+            action: "CancelledAppointment",
+            entityType: "Appointment",
+            entityId: appointment.Id,
+            details: $"Cancelled appointment for {appointment.Patient?.FullName} with {appointment.Provider?.FullName}."
+        );
         return MapToResponse(appointment);
     }
 

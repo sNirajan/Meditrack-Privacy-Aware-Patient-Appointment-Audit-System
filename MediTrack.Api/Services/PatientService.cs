@@ -8,12 +8,22 @@ namespace MediTrack.Api.Services;
 public class PatientService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly AuditLogService _auditLogService;
 
-    // ASP.NET Core will give ApplicationDbContext through dependency injection
-    // This lets the service read and write patient records from the database
-    public PatientService(ApplicationDbContext dbContext)
+    // Gives this service access to the currently authenticated user's ID and role from the JWT.
+    private readonly CurrentUserService _currentUserService;
+
+    // ASP.NET Core gives us both ApplicationDbContext and AuditLogService through dependency injection
+    // The database context saves patient data, and the audit service records important actions
+    public PatientService(
+        ApplicationDbContext dbContext,
+        AuditLogService auditLogService,
+        CurrentUserService currentUserService
+    )
     {
         _dbContext = dbContext;
+        _auditLogService = auditLogService;
+        _currentUserService = currentUserService;
     }
 
     // Creates a new patient record from the request data
@@ -31,6 +41,16 @@ public class PatientService
 
         // SaveChangesAsync sends the insert operation to the database
         await _dbContext.SaveChangesAsync();
+
+        // asks to record event (patients actions)
+        await _auditLogService.RecordAsync(
+            userId: _currentUserService.UserId,
+            userRole: _currentUserService.UserRole,
+            action: "CreatedPatient",
+            entityType: "Patient",
+            entityId: patient.Id,
+            details: $"Created patient record for {patient.FullName}."
+        );
 
         return MapToResponse(patient);
     }
@@ -52,6 +72,15 @@ public class PatientService
         {
             return null;
         }
+
+        await _auditLogService.RecordAsync(
+            userId: _currentUserService.UserId,
+            userRole: _currentUserService.UserRole,
+            action: "ViewedPatient",
+            entityType: "Patient",
+            entityId: patient.Id,
+            details: $"Viewed patient record for {patient.FullName}."
+        );
 
         return MapToResponse(patient);
     }
